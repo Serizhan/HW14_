@@ -72,13 +72,26 @@ def movie_genre(genre):
 
 def movie_by_two_cast(cast_1, cast_2):
     result = f"""
-            SELECT COUNT(*), "cast"
+            SELECT "cast"
             FROM netflix
             WHERE "cast" LIKE '%{cast_1}%' 
             AND "cast" LIKE '%{cast_2}%'
 
     """
-    return open_file_db(result)
+
+    cast_list = {}
+    total_list = []
+    for row in open_file_db(result):
+        names = set(row[0].split(', ')) - {cast_1, cast_2}
+        for item in names:
+            cast_list[item] = cast_list.get(item, 0) + 1
+
+    for key, values in cast_list.items():
+        if values >= 2:
+            total_list.append(key)
+
+    return total_list
+
 
 
 def movie_by_type_year_genre(type, year, genre):
@@ -93,5 +106,3 @@ def movie_by_type_year_genre(type, year, genre):
     json_file = json.dumps(open_file_db(result))
     return json_file
 
-
-print(movie_by_type_year_genre('Movie', 2014, 'Horror'))
